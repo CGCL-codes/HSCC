@@ -1,30 +1,27 @@
 # SHMA---Software-managed Caching for Hybrid DRAM/NVM Memory Architectures
 
-&#160; &#160; &#160; &#160;SHMA is implemented with zsim and NVMain. Hybrid simulator that integrates cycle-accurate main memory simulator for emerging non-volatile memories --NVMain with zsim can be forked from "https://github.com/AXLEproject/axle-zsim-nvmain". 
-Comparing to zsim-nvmain hybrid simulator, SHMA has achieved following functions:
+&#160; &#160; &#160; &#160;SHMA is implemented with zsim and NVMain simulators.  Zsim is a fast x86-64 multi-core simulator. It exploits Intel Pin toolkit to collect traces of memory accesses for processes, and replays the traces in the zsim simulator. NVMain is a cycle-accurate memory simulator, it models components of DRAM and NVMs, and memory hierarchy in detail. The integrated "zsim + NVMain" simulators can be forked from "https://github.com/AXLEproject/axle-zsim-nvmain". 
 
- * **Implemented memory management simulations(such as MemoryNode, Zone, BuddyAllocator etc.)**:   Considering that pin-based zsim only replays virtual address into simulation architecture, and 
-doesn support OS simulation, SHMA has added memory management simulation into zsim, including 
-memory node, zone and buddy allocator.
+Based on the "zsim + NVMain" hybrid simulator, SHMA has added the following functions:
+
+ * **Memory management simulations (such as MemoryNode, Zone, Buddy allocator etc.)**:   As the pin-based zsim only replays virtual address in the x86 system architecture, and does not support OS simulation, SHMA has added memory management modules into zsim, including memory node, zone and buddy allocator.
 
 
- * **TLB simulation:** Original zsim-nvmain hybrid simulator has no simulation of TLB, since SHMA has added memory management modules into zsim, TLB simulation is implemented in zsim accordingly to accelerate address translation procedure for virtual address to physical address.
+ * **TLB simulation:** The original "zsim + NVMain" simulator does not simulate the TLB. TLB simulation is implemented in zsim to accelerate address translations from virtual address to physical address.
 
  
- * **Implementation of SHMA, a hierarchical hybrid DRAM/NVM memory system that brought DRAM caching issues into software level:** DRAM cache is managed by hardware totally in tranditional    DRAM-NVM hierarchical hybrid systems, SHMA is based on a novel software-managed cache mechanism that organizes NVM and DRAM in a flat physical address space while logically supporting a hierarchical memory architecture, this design has brought DRAM caching issues into software level.Besides, SHMA only caches hot pages into DRAM cache to reduce cache pollution and bandwidth waste between DRAM cache and NVM main memory.
+ * **Implementation of SHMA, a hierarchical hybrid DRAM/NVM memory system that pushes DRAM caching management issues into the software level:** DRAM cache is managed by hardware in tranditional DRAM/NVM hierarchical hybrid systems. SHMA is a novel software-managed cache mechanism that organizes NVM and DRAM in a flat physical address space while logically supporting a hierarchical memory architecture. This design simplifies the hardware design by pushing the burden of DRAM cache management to the software layers. Besides, SHMA only caches hot NVM pages into the DRAM cache to mitigate potential cache thrashing and bandwidth waste between DRAM cache and NVM main memory.
  
  
- * **Multiple DRMA-NVM hybrid architecture supports:** Support both DRAM-NVM flat-addressable hybrid memory architecuture and DRAM-NVM hierarchical hybrid architecture.As shown in following picture,both DRAM and NVM are used as main memory and managed by OS uniformly in DRAM-NVM flat-addressable hybrid architecture. In DRAM-NVM hierarchical hybrid memory architecture, DRAM is exploited as cache of NVM, hardware-assisted hit-judgement used to determine whether data hits in DRAM cache is necessary in this architecutre. Besides, to reduce hardware overhead, DRAM cache is organized set-associative and uses Demand-based caching policy.
+ * **Multiple DRMA/NVM hybrid architecture supports:** SHMA supports both DRAM/NVM flat-addressable hybrid memory architecuture and DRAM/NVM hierarchical hybrid architecture. As shown in following figure, both DRAM and NVM are used as main memory and managed by OS in a single flat address space. In DRAM/NVM hierarchical hybrid memory architecture, DRAM is exploited as a cache to the NVM, and hardware-assisted hit-judgement mechanism is implemented to determine whether data is hit in DRAM cache. Besides, to reduce hardware overhead, DRAM cache is organized set-associative and usually uses demand-based caching policies.
 ![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/DRAM-NVM_architectures.png)
  
  
- *  **Multiple DRAM-NVM hybrid system optimization policies:** We have implemented Row Buffer Locality Aware(RBLA) Migrating policy and MultiQueue-based(MultiQueue) Migrating policy in DRAM-NVM flat addressable hybrid memory system. RBLA Migrating policy is a simple implementation of hybrid memory system proposed in thesis "**Row Buffer Locality Aware Caching Policies for Hybrid Memories**", MultiQueue Migrating policy is a simple implementation of thesis "**Page Placement in Hybrid Memory Systems**". RBLA Migrating policy is aimed at migrating NVM pages with bad row buffer locality to DRAM since row buffer miss of NVM pages pay more overhead than row buffer miss of DRAM pages, and row buffer hit of NVM pages gains more performance than row buffer hit of DRAM pages.MultiQueue Migrating policy migrates hot NVM pages into DRAM, hotness of a page is measured by both time locality and access frequency, MQ algorithm is used to update hotness of pages.
+ *  **Multiple DRAM/NVM hybrid system optimization policies:** We have implemented Row Buffer Locality Aware (RBLA) page caching policy and MultiQueue-based (MultiQueue) page migration policy in DRAM/NVM flat addressable hybrid memory system. RBLA caching policy is a simple implementation of hybrid memory system proposed in the paper "**Row Buffer Locality Aware Caching Policies for Hybrid Memories**", MultiQueue migration policy is a simple implementation of system proposed in the paper "**Page Placement in Hybrid Memory Systems**". RBLA caching policy is aimed at migrating NVM pages with poor row buffer locality to DRAM since row buffer miss of NVM pages incur higher overhead than that of DRAM pages. The MultiQueue migration policy places hot NVM pages into DRAM, and MQ algorithm is used to update the hotness of pages based on time locality and access frequency.
 
 
-Modules and architecture of hybrid simulator are shown as following:
+The architecture and modules of SHMA are shown in the following figure:
 ![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/simulator_architecture.png)
-
-The research leading to these results has received funding from National high technology research and development program(**863 program**) project corpus, in-memory computing system software research and development project
 
 
 Origianl License & Copyright of zsim
@@ -40,8 +37,33 @@ Additionally, if you use this software in your research, we request that you ref
 
 License & Copyright of SHMA ([HUST SCTS & CGCL Lab](http://grid.hust.edu.cn/))
 -------------------------
-SHMA was extended by Yujie Chen, Dong Liu at Cluster and Grid Computing Lab & Services Computing Technology and System Lab of Huazhong University of Science and Technology([HUST SCTS & CGCL Lab](http://grid.hust.edu.cn/)), the copyright of this SHMA remains with CGCL & SCTS Lab of Huazhong University of Science and Technology.
+SHMA is implemented by Yujie Chen, Dong Liu and Haikun Liu at Cluster and Grid Computing Lab & Services Computing Technology and System Lab in Huazhong University of Science and Technology([HUST SCTS & CGCL Lab](http://grid.hust.edu.cn/)), the copyright of this SHMA remains with CGCL & SCTS Lab of Huazhong University of Science and Technology.
 
+## Citing SHMA
+
+If you use SHMA, please cite our reearch paper published at ICS 2017, included as doc/HSCC.pdf.
+
+**Haikun Liu, Yujie Chen, Xiaofei Liao, Hai Jin, Bingsheng He, Long Zhen and Rentong Guo, Hardware/Software Cooperative Caching for Hybrid DRAM/NVM Memory Architectures, in: Proceedings of the 31st International Conference on Supercomputing (ICS'17), Chicago, IL, USA, June 14-16, 2017**
+```javascript
+@inproceedings{Liu:2017:HCC:3079079.3079089,
+ author = {Liu, Haikun and Chen, Yujie and Liao, Xiaofei and Jin, Hai and He, Bingsheng and Zheng, Long and Guo, Rentong},
+ title = {Hardware/Software Cooperative Caching for Hybrid DRAM/NVM Memory Architectures},
+ booktitle = {Proceedings of the International Conference on Supercomputing},
+ series = {ICS 2017},
+ year = {2017},
+ isbn = {978-1-4503-5020-4},
+ location = {Chicago, Illinois},
+ pages = {26:1--26:10},
+ articleno = {26},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/3079079.3079089},
+ doi = {10.1145/3079079.3079089},
+ acmid = {3079089},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {caching, hybird memory, non-volatile memory (NVM)},
+}
+```
 
 Setup,Compiling and Configuration
 ------------
@@ -212,34 +234,27 @@ example( simpoint file of msf with 31 simpoints):
 
 TLB, Page Table and Memory Management Simulation Modules
 -----------------------
-&#160; &#160; &#160; &#160;As described above, original zsim doesn't support OS simulation, and SHMA has added TLB, page table and memory management simulation into zsim, main modification is shown as following picture. The left side marks major code of original zsim corresponding to system simulation, **the right side marks SHMA modifications to zsim for TLB, page table and memory management simulation support.**
+&#160; &#160; &#160; &#160;As described above, original zsim doesn't support OS simulation, and SHMA has added TLB, page table and memory management simulation into zsim. The major modifications are shown in the following figure. The left side presents the major code of original zsim corresponding to system simulation, **the right side describes SHMA modifications to zsim for TLB, page table and memory management simulation support.**
 ![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/zsim_modification.png)
 
 Architecture of SHMA(software-managed DRAM Caching)
 ---------------------------
-&#160; &#160; &#160; &#160; SHMA has extended both page table and TLB to maintain both mappings from virtual address to physical address and physical address to DRAM cache address, this has brought DRAM cache management into software level, so that DRAM cache can be exploited fully. Besides, SHMA adopts utility-based DRAM caching policy that only fetching hot pages into DRAM cache when its memory pressure in high state to reduce DRAM cache pollution. SHMA supports DRAM cache directly bypass,too. Following picture is the architecture of SHMA.![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/SHMA_architecture.png)
+&#160; &#160; &#160; &#160; SHMA has extended both page table and TLB to maintain both virtual-to-NVM and NVM-to-DRAM address mappings. SHMA also develops an utility-based DRAM caching policy that only fetching hot pages into DRAM cache when the DRAM is under high pressure to reduce DRAM cache pollution. SHMA also supports DRAM cache bypassing mechanism. The following figure shows the architecture of SHMA.![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/SHMA_architecture.png)
 
 Implementations of RBLA and MultiQueue Policies
 ----------------------------
 * **Row Buffer Locality Aware Migrator (RBLA)**  
-&#160; &#160; &#160; &#160;RBLA migrates NVM pages with bad row buffer locality to DRAM, and reserve pages with good row buffer locality in NVM to gain benefit from row buffer hit in NVM and reduce overhead caused by row buffer miss in NVM. Its implementation is shown as following picture:![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/RBLA.png)
+&#160; &#160; &#160; &#160;RBLA migrates NVM pages with poor row buffer locality to DRAM, and keeps pages with good row buffer locality in NVM to gain the benefit of row buffer hit. The implementation is shown in the following figure:![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/RBLA.png)
 
 
 * **hot page migrator based on MultiQueue Alogrithm (MultiQueue)**  
-&#160; &#160; &#160; &#160;MultiQueue classify NVM pages into hot pages and cold pages using multiqueue algorithm accroding to both page access frequency and time locality. Its implementation is shown as following picture:![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/MultiQueue.png)
+&#160; &#160; &#160; &#160;MultiQueue classifies NVM pages into hot pages and cold pages using multiqueue algorithm accroding to both page access frequency and time locality. Its implementation is shown in the following figure:![Image of Yaktocat](https://github.com/cyjseagull/SHMA/blob/master/images/MultiQueue.png)
 
 * **Architecture of flat memory supporting different channel configurations of DRAM and NVM**  
-&#160; &#160; &#160; &#160;Considering that DRAM and NVM with different channel configurations have the overlapping address space in the low end, we divide the continuous overlapped address space into {channel_nums} and mapping them to different address space interleavingly to make full use of channel parallization
+&#160; &#160; &#160; &#160;Considering that DRAM and NVM with different channel configurations have the overlapping address space in the low end, we divide the continuous overlapped address space into {channel_nums} and mapping them to different address space interleavingly to make full use of channel parallization.
 
 
-Happy hacking and hope you find SHMA useful for hybrid memory architecture research.
-
-@Support or Contact
-
-SHMA is developed in the HUST SCTS&CGCL Lab by Yujie Chen, Haikun Liu and Xiaofei Liao. If you have any questions, please contact Yujie Chen(yujiechen_hust@163.com), Haikun Liu (hkliu@hust.edu.cn) and Xiaofei Liao (xfliao@hust.edu.cn). We welcome you to commit your modification to support our project.
 
 ## Support or Contact
-This is developed in the [HUST SCTS&CGCL Lab](http://grid.hust.edu.cn/).
-If you have any questions, please contact Yujie Chen(yujiechen_hust@163.com), Haikun Liu (hkliu@hust.edu.cn) and Xiaofei Liao (xfliao@hust.edu.cn).
-We welcome you to commit your modification to support our project.
+SHMA is developed at SCTS&CGCL Lab (http://grid.hust.edu.cn/) by Yujie Chen, Haikun Liu and Xiaofei Liao. For any questions, please contact Yujie Chen(yujiechen_hust@163.com), Haikun Liu (hkliu@hust.edu.cn) and Xiaofei Liao (xfliao@hust.edu.cn). 
  
