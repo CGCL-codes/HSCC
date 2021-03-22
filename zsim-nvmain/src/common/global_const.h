@@ -21,7 +21,7 @@ typedef uint64_t Address;
 #define INVALID_PROC ((uint32_t)(-1))
 //default page size is 4KB
 const unsigned PAGE_SHIFT=12;
-const unsigned PAGE_2MB_SHIFT=20;
+const unsigned PAGE_2MB_SHIFT=21;
 const unsigned PAGE_4MB_SHIFT=22;
 const unsigned PAGE_1GB_SHIFT=30;
 const unsigned PAGE_SIZE=(1UL<<PAGE_SHIFT);
